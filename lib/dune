@@ -1,0 +1,6 @@
+(library
+ (name bstruct)
+ (public_name bstruct)
+ (libraries  cstruct)
+ (synopsis "A buffered wrapper around cstruct")
+)

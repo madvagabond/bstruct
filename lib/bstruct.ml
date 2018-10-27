@@ -20,7 +20,6 @@ let capacity t =
   Cstruct.len t.buf
 
 
-(**  writer_index - reader_index*)
 let readable t =
   t.write - t.read
 
@@ -30,6 +29,8 @@ let reader_index t = t.read
 
 
 let writer_index t = t.write
+
+let underlying t = t.buf 
 
 
 let set_writer_index t off =
@@ -53,6 +54,19 @@ let writable t =
 
 
 
+let copy_to_cstruct t =
+  let buf = Cstruct.create t.write in
+  let _ = Cstruct.blit t.buf 0 buf 0 t.write in
+  buf
+
+
+let to_cstruct t =
+  Cstruct.sub t.buf 0 t.write
+
+
+let reset t =
+  t.write <- 0;
+  t.read <- 0
 
 
 let create size =
@@ -95,16 +109,37 @@ let is_readable t len =
 
 
 
+let read_check t len =
+  if is_readable t len then
+    raise Out_of_bounds
+  else
+    ()
+
+
+
+let write_check t len =
+  let needed = t.write + len in
+  let size = capacity t in
+
+
+  if size < needed then
+    let diff = needed - size in
+    grow t diff
+  else
+    ()
+
+
+
+
+
+
+
 
 
 
 let slice_bytes t len =
-  let has_space = is_readable t len in
-
-  if has_space then 
-    Cstruct.sub t.buf t.read len
-  else
-    raise Out_of_bounds
+  let _ = read_check t len in 
+  Cstruct.sub t.buf t.read len
 
 
 
@@ -119,50 +154,31 @@ let slice t len =
 
 
 let read_bytes t len =
-  if is_readable t len then 
-    let copy = Cstruct.create len in 
-    Cstruct.blit t.buf t.read copy 0 len;
-    copy
-  else
-    raise Out_of_bounds
+  let _ = read_check t len in 
+  let copy = Cstruct.create len in
+  
+  Cstruct.blit t.buf t.read copy 0 len;
+  t.read <- t.read + len; 
+  copy
 
 
 
 
-
-let copy t len =
+let read t len =
   read_bytes t len |> of_cstruct
 
 
 let get t n fn =
-
-  if is_readable t n then 
-
-    let i = fn t.buf t.read in
-    let _ = t.read <- t.read + n in
-    i
-
-  else
-    raise Out_of_bounds
-
-
+  let _ = read_check t n in 
+  let i = fn t.buf t.read in
+  let _ = t.read <- t.read + n in
+  i
 
 
 
 
 let set t len fn c =
-  let needed = t.write + len in
-  let size = capacity t in 
-
-
-  let _ =
-    if size < needed then
-      let diff = needed - size in
-      grow t diff
-    else
-      ()
-  in
-
+  write_check t len; 
   fn t.buf t.write c;
   t.write <- t.write + len
 
@@ -175,41 +191,21 @@ let read_string t len =
 
 
 
+
+
+
 let write_bytes t buf =
-  let len = Cstruct.len buf in 
-  
-  let _ =
-     let needed = t.write + len in
-     let size = capacity t in
-
-
-     if size < needed then
-       let diff = needed - size in
-       grow t diff
-     else
-       ()
-  in
+  let len = Cstruct.len buf in
+  let _ = write_check t len in 
   
   Cstruct.blit t.buf t.write buf 0 len;
   t.write <- t.write + len
 
 
 
-
 let append t buf =
-  let len = buf.write in 
-  
-  let _ =
-     let needed = t.write + len in
-     let size = capacity t in
-
-
-     if size < needed then
-       let diff = needed - size in
-       grow t diff
-     else
-       ()
-  in
+  let len = buf.write in
+  let _ = write_check t len in 
 
   Cstruct.blit t.buf t.write buf.buf 0 len;
   t.write <- t.write + len
@@ -235,8 +231,6 @@ module type BYTE_ORDER = sig
   val get_uint64: Cstruct.t -> int -> uint64
     
 end
-
-
 
 
 

@@ -92,7 +92,13 @@ let is_readable t len =
 
 
 
-let read_bytes t len =
+
+
+
+
+
+
+let slice_bytes t len =
   let has_space = is_readable t len in
 
   if has_space then 
@@ -103,16 +109,41 @@ let read_bytes t len =
 
 
 
-  
-  
-let read_slice t len =
+
+
+let slice t len =
+  slice_bytes t len |> of_cstruct
+
+
+
+
+
+let read_bytes t len =
+  if is_readable t len then 
+    let copy = Cstruct.create len in 
+    Cstruct.blit t.buf t.read copy 0 len;
+    copy
+  else
+    raise Out_of_bounds
+
+
+
+
+
+let copy t len =
   read_bytes t len |> of_cstruct
 
 
+let get t n fn =
 
+  if is_readable t n then 
 
+    let i = fn t.buf t.read in
+    let _ = t.read <- t.read + n in
+    i
 
-
+  else
+    raise Out_of_bounds
 
 
 
@@ -139,26 +170,55 @@ let set t len fn c =
 
 
 
+let read_string t len =
+  read_bytes t len |> Cstruct.to_string
 
 
 
-let get t n fn =
-
-  if is_readable t n then 
-
-    let i = fn t.buf t.read in
-    let _ = t.read <- t.read + n in
-    i
-
-  else
-    raise Out_of_bounds
+let write_bytes t buf =
+  let len = Cstruct.len buf in 
+  
+  let _ =
+     let needed = t.write + len in
+     let size = capacity t in
 
 
+     if size < needed then
+       let diff = needed - size in
+       grow t diff
+     else
+       ()
+  in
+  
+  Cstruct.blit t.buf t.write buf 0 len;
+  t.write <- t.write + len
 
 
 
 
+let append t buf =
+  let len = buf.write in 
+  
+  let _ =
+     let needed = t.write + len in
+     let size = capacity t in
 
+
+     if size < needed then
+       let diff = needed - size in
+       grow t diff
+     else
+       ()
+  in
+
+  Cstruct.blit t.buf t.write buf.buf 0 len;
+  t.write <- t.write + len
+
+
+
+let write_string t s =
+  let buf = Cstruct.of_string s in
+  write_bytes t buf
 
 
 
@@ -175,6 +235,9 @@ module type BYTE_ORDER = sig
   val get_uint64: Cstruct.t -> int -> uint64
     
 end
+
+
+
 
 
 
@@ -206,5 +269,6 @@ end
 
 module LE = Make(Cstruct.LE)
 module BE = Make(Cstruct.BE)
+
 
 

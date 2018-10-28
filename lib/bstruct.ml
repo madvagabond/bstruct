@@ -1,4 +1,5 @@
-exception Out_of_bounds
+
+exception Out_of_bounds of int 
 
 
 
@@ -8,6 +9,7 @@ type t = {
   mutable write: int;
   initial_size: int; 
 }
+
 
 
 
@@ -33,11 +35,11 @@ let writer_index t = t.write
 let underlying t = t.buf 
 
 
-let set_writer_index t off =
+let set_write_index t off =
   t.write <- off
 
 
-let set_reader_index t off =
+let set_read_index t off =
   t.read <- off
 
 
@@ -112,7 +114,8 @@ let read_check t len =
   if is_readable t len then
     ()
   else
-    raise Out_of_bounds
+    let diff = len - (t.write - t.read) in
+    raise (Out_of_bounds diff)
 
 
 

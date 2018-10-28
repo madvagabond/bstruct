@@ -1,4 +1,8 @@
-exception Out_of_bounds
+
+
+
+(** Thrown when you want to read more bytes than there have been written, the integer it carries = len_requested  - (write_index - read_index) .*)
+exception Out_of_bounds of int 
 
 type t = {
   mutable buf: Cstruct.t;
@@ -12,8 +16,8 @@ val empty: unit -> t
 val create: int -> t 
 
 
-val set_writer_index: t -> int -> unit
-val set_reader_index: t -> int -> unit
+val set_write_index: t -> int -> unit
+val set_read_index: t -> int -> unit
   
 val grow: t -> int -> unit
 
@@ -28,10 +32,10 @@ val underlying: t -> Cstruct.t
 (** Returns the actual size of the underlying buffer *)
 val capacity: t -> int
 
-(** Resets both reader index to 0 *)
+(** Resets the reader index to 0 *)
 val reset: t -> unit
 
-(** Discard underlying cstruct and replaces it with another buffer of it's initial size*)
+(** Discard underlying cstruct and replaces it with another buffer of it's initial size and resets both indexes*)
 val clear: t -> unit
 
 val writer_index: t -> int

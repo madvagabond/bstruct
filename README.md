@@ -1,14 +1,17 @@
-## bstruct, a mutable buffer built on cstruct. 
+## Bstruct, a resizable, mutable buffer built on cstruct. 
 
-### How does it differ from mstruct?
+## How does it differ from mstruct?
 
 It's more similar to Netty's bytebuf in the sense that it is resizeable, and has separate indexes for reads and writes.
 
 So with Mstruct you can't write past it's inital allocated size, and you can't read bytes you've written without converting it to a cstruct, or shifting its offset manually.
 
-It also has a number of zero copy read operations, read the docs or mli file if you want to know more about them.
+It also has a number of zero copy read operations, read the docs or the mli file if you want to know more about them.
 
-### Usage.
+
+
+
+## Usage.
 ```ocaml
 
   (** allocating a buffer of size 0 *)

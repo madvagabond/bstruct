@@ -10,7 +10,7 @@ doc: ""
 
 build: [
   [ "dune" "subst" ] {pinned}
-  [ "dune" "build" "-p" name "-j" jobs "--profile" "release" ]
+  ["dune" "build" "-p" name "-j" jobs]
 ]
   
 depends: [

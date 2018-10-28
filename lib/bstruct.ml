@@ -65,7 +65,6 @@ let to_cstruct t =
 
 
 let reset t =
-  t.write <- 0;
   t.read <- 0
 
 
@@ -111,9 +110,9 @@ let is_readable t len =
 
 let read_check t len =
   if is_readable t len then
-    raise Out_of_bounds
-  else
     ()
+  else
+    raise Out_of_bounds
 
 
 
@@ -164,8 +163,10 @@ let read_bytes t len =
 
 
 
+
 let read t len =
   read_bytes t len |> of_cstruct
+
 
 
 let get t n fn =
@@ -187,18 +188,23 @@ let set t len fn c =
 
 
 let read_string t len =
-  read_bytes t len |> Cstruct.to_string
 
+  let _ = read_check t len in 
+  let copy = Bytes.create len in
+
+  Cstruct.blit_to_bytes t.buf t.read copy t.read len;
+  t.read <- t.read + len; 
+  copy
 
 
 
 
 
 let write_bytes t buf =
-  let len = Cstruct.len buf in
-  let _ = write_check t len in 
-  
-  Cstruct.blit t.buf t.write buf 0 len;
+  let len = Cstruct.len buf in 
+  let _ = write_check t len in
+
+  let _ = Cstruct.blit buf 0 t.buf t.write len in
   t.write <- t.write + len
 
 
@@ -213,11 +219,19 @@ let append t buf =
 
 
 let write_string t s =
-  let buf = Cstruct.of_string s in
-  write_bytes t buf
+  let len = String.length s in
+  let _ = write_check t len in 
+  let _ = Cstruct.blit_from_string s 0 t.buf t.write len in
+  t.write <- t.write + len
 
 
 
+
+let set_uint8 t b =
+  set t 1 Cstruct.set_uint8 b
+
+let get_uint8 t =
+  get t 1 Cstruct.get_uint8
 
 module type BYTE_ORDER = sig
   open Cstruct 

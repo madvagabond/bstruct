@@ -1,0 +1,11 @@
+(executable
+ (name bstruct_test)
+ (public_name bstruct-test)
+ (libraries bstruct alcotest)
+)
+
+
+
+(alias
+ (name runtest)
+ (action (run %{exe:bstruct_test.exe})))

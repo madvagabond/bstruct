@@ -8,6 +8,10 @@ type t = {
 }
 
 
+val empty: unit -> t
+val create: int -> t 
+
+
 val set_writer_index: t -> int -> unit
 val set_reader_index: t -> int -> unit
   
@@ -24,7 +28,7 @@ val underlying: t -> Cstruct.t
 (** Returns the actual size of the underlying buffer *)
 val capacity: t -> int
 
-(** Resets both reader and writer index to 0 *)
+(** Resets both reader index to 0 *)
 val reset: t -> unit
 
 (** Discard underlying cstruct and replaces it with another buffer of it's initial size*)
@@ -62,31 +66,37 @@ val to_cstruct: t -> Cstruct.t
 (** Copies the written bytes of the underlying buffer to a fresh cstruct *)
 val copy_to_cstruct: t -> Cstruct.t 
 
+val get_uint8: t -> int
+val set_uint8: t -> int -> unit
+
+
 
 module BE: sig
   
   
-  val set_uint16: t -> Cstruct.uint16 -> unit
-  val set_uint32: t -> Cstruct.uint32 -> unit
-  val set_uint64: t -> Cstruct.uint64 -> unit
+  val set_uint16: t -> int -> unit
+  val set_uint32: t -> int32 -> unit
+  val set_uint64: t -> int64 -> unit
 
 
-  val get_uint16: t -> Cstruct.uint16
-  val get_uint32: t -> Cstruct.uint32
-  val get_uint64: t -> Cstruct.uint64
+  val get_uint16: t -> int
+  val get_uint32: t -> int32
+  val get_uint64: t -> int64
     
 end
 
 
 module LE: sig
 
-  val set_uint16: t -> Cstruct.uint16 -> unit
-  val set_uint32: t -> Cstruct.uint32 -> unit
-  val set_uint64: t -> Cstruct.uint64 -> unit
+  val set_uint16: t -> int -> unit
+  val set_uint32: t -> int32 -> unit
+  val set_uint64: t -> int64 -> unit
 
 
-  val get_uint16: t -> Cstruct.uint16
-  val get_uint32: t -> Cstruct.uint32
-  val get_uint64: t -> Cstruct.uint64
+  val get_uint16: t -> int
+  val get_uint32: t -> int32
+  val get_uint64: t -> int64
+    
     
 end 
+ 

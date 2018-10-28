@@ -1,16 +1,32 @@
 opam-version: "2.0"
 maintainer: "Sam Riyad"
-authors: []
-tags: []
-license: ""
-homepage: ""
-dev-repo: "https://github.com/xnukernpoll/bstruct"
-bug-reports: ""
+authors: ["Sam Riyad"]
+tags: ["io", "buffers", "zero-copy"]
+license: "MIT"
+homepage: "https://github.com/xnukernpoll/bstruct"
+dev-repo: "git+https://github.com/xnukernpoll/bstruct"
+bug-reports: "https://github.com/xnukernpoll/bstruct/issues"
 doc: ""
+
 build: [
   [ "dune" "subst" ] {pinned}
   [ "dune" "build" "-p" name "-j" jobs "--profile" "release" ]
 ]
+  
 depends: [
+  "cstruct"
   "dune" {build}
 ]
+
+
+
+
+synopsis: """
+  A resizeable mutable buffer built on top of cstruct
+"""
+
+
+
+description: """
+  Bstruct is a buffer similar to Netty's bytebuf that maintains both a read and write index supports some zero copy operations, and resizes itself appropriately for it's writes.       
+"""

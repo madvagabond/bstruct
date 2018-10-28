@@ -1,7 +1,7 @@
 opam-version: "2.0"
 maintainer: "Sam Riyad"
 authors: ["Sam Riyad"]
-tags: ["io", "buffers", "zero-copy"]
+tags: ["io" "buffers" "zero-copy"]
 license: "MIT"
 homepage: "https://github.com/xnukernpoll/bstruct"
 dev-repo: "git+https://github.com/xnukernpoll/bstruct"
